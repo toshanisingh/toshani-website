@@ -4,8 +4,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { renderContent } from "@/lib/render-content";
+import { getReactionState } from "@/lib/reactions";
 import { ShareBar } from "@/components/ShareBar";
-import { CommentsSection } from "@/components/comments/CommentsSection";
+import { ReactionBar } from "@/components/ReactionBar";
 
 type Props = { params: Promise<{ section: string; slug: string }> };
 
@@ -51,6 +52,7 @@ export default async function PublicPage({ params }: Props) {
   if (!page) notFound();
 
   const html = renderContent(page.body);
+  const reactions = await getReactionState(page.id);
 
   return (
     <article className="mx-auto max-w-3xl">
@@ -103,7 +105,9 @@ export default async function PublicPage({ params }: Props) {
         </div>
       )}
 
-      <CommentsSection pageId={page.id} />
+      <div className="mt-10 border-t border-sky-edge/60 pt-6">
+        <ReactionBar pageId={page.id} initial={reactions} />
+      </div>
     </article>
   );
 }
