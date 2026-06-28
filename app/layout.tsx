@@ -3,6 +3,7 @@ import { Inter, Lora } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { siteConfig } from "@/lib/site";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -17,11 +18,15 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Toshani",
-    template: "%s · Toshani",
+    default: siteConfig.name,
+    template: `%s · ${siteConfig.name}`,
   },
-  description: "Notes, blogs, and books — a personal space for writing and learning.",
+  description: siteConfig.description,
+  alternates: {
+    types: { "application/rss+xml": "/feed.xml" },
+  },
 };
 
 export default function RootLayout({

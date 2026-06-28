@@ -3,8 +3,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { isAboutSlug, activeSocials } from "@/lib/site";
 import { PageCard } from "@/components/PageCard";
 import { ShareBar } from "@/components/ShareBar";
+import { SocialLinks } from "@/components/SocialLinks";
 
 type Props = {
   params: Promise<{ section: string }>;
@@ -77,6 +79,13 @@ export default async function SectionPage({ params, searchParams }: Props) {
           <ShareBar title={s.name} />
         </div>
       </header>
+
+      {isAboutSlug(s.slug) && activeSocials.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-sky-edge/60 bg-sky-softer px-5 py-4">
+          <span className="text-sm font-medium text-ink">Find me online:</span>
+          <SocialLinks />
+        </div>
+      )}
 
       {tags.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
