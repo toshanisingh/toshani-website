@@ -3,7 +3,7 @@ import Link from "next/link";
 // Dashboard placeholder. Section + page management land in Phases 4–5.
 const tiles = [
   { href: "/admin/sections", title: "Sections", desc: "Create and order site sections.", soon: false },
-  { href: "/admin/pages/new", title: "New page", desc: "Write a post with the rich-text editor.", soon: true },
+  { href: "/admin/pages", title: "Pages", desc: "Write and manage posts with the rich-text editor.", soon: false },
 ];
 
 export default function AdminDashboard() {

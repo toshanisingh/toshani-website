@@ -19,7 +19,14 @@ export default async function AdminLayout({
           <Link href="/admin" className="text-lg font-bold text-primary">
             Admin
           </Link>
-          <span className="text-sm text-muted">{session.user?.email}</span>
+          <nav className="flex items-center gap-1">
+            <Link href="/admin/sections" className="rounded-md px-2.5 py-1.5 text-sm font-medium text-muted hover:bg-sky-soft hover:text-primary">
+              Sections
+            </Link>
+            <Link href="/admin/pages" className="rounded-md px-2.5 py-1.5 text-sm font-medium text-muted hover:bg-sky-soft hover:text-primary">
+              Pages
+            </Link>
+          </nav>
         </div>
         <form
           action={async () => {
