@@ -1,0 +1,65 @@
+// Toshani — data model.
+// See PLAN.md for the requirement → model mapping.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // Pooled connection used at runtime (Neon's "-pooler" host).
+  url       = env("DATABASE_URL")
+  // Direct (non-pooled) connection used for migrations.
+  directUrl = env("DIRECT_URL")
+}
+
+/// The single privileged user who can create sections and pages.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+/// A top-level area of the site (e.g. "Blogs", "Books", "About Me").
+/// Only the admin creates these (requirement #1).
+model Section {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  position  Int      @default(0) // controls nav ordering
+  pages     Page[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// A piece of content within a section, authored in the rich-text editor.
+/// `body` holds Tiptap JSON. Tags + publishedAt power search and the
+/// date/tag organization of blogs (requirements #3, #4).
+model Page {
+  id            String    @id @default(cuid())
+  section       Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  sectionId     String
+  title         String
+  slug          String
+  body          Json      @default("{}") // Tiptap document JSON
+  excerpt       String?
+  coverImageUrl String?
+  draft         Boolean   @default(true) // write privately, publish when ready
+  publishedAt   DateTime?
+  tags          Tag[]     @relation("PageTags")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([sectionId, slug]) // slug unique within its section -> /[section]/[slug]
+  @@index([publishedAt])
+  @@index([draft])
+}
+
+/// A label attached to pages for search and grouping (requirement #3).
+model Tag {
+  id    String @id @default(cuid())
+  name  String @unique
+  slug  String @unique
+  pages Page[] @relation("PageTags")
+}
