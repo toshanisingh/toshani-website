@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { PageCard } from "@/components/PageCard";
+import { ShareBar } from "@/components/ShareBar";
 
 type Props = {
   params: Promise<{ section: string }>;
@@ -62,15 +63,18 @@ export default async function SectionPage({ params, searchParams }: Props) {
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <h1 className="text-3xl font-bold tracking-tight text-ink">{s.name}</h1>
-        <div className="flex items-center gap-1 text-sm">
-          <span className="text-muted">Sort:</span>
-          <Link href={sortHref("")} className={sort !== "oldest" ? "font-semibold text-primary" : "text-muted hover:text-primary"}>
-            Newest
-          </Link>
-          <span className="text-muted">·</span>
-          <Link href={sortHref("oldest")} className={sort === "oldest" ? "font-semibold text-primary" : "text-muted hover:text-primary"}>
-            Oldest
-          </Link>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 text-sm">
+            <span className="text-muted">Sort:</span>
+            <Link href={sortHref("")} className={sort !== "oldest" ? "font-semibold text-primary" : "text-muted hover:text-primary"}>
+              Newest
+            </Link>
+            <span className="text-muted">·</span>
+            <Link href={sortHref("oldest")} className={sort === "oldest" ? "font-semibold text-primary" : "text-muted hover:text-primary"}>
+              Oldest
+            </Link>
+          </div>
+          <ShareBar title={s.name} />
         </div>
       </header>
 

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { PageCard } from "@/components/PageCard";
+import { ShareBar } from "@/components/ShareBar";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -37,9 +38,12 @@ export default async function TagPage({ params }: Props) {
 
   return (
     <div className="space-y-8">
-      <header>
-        <p className="text-sm font-medium text-accent">Tag</p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight text-ink">#{tag.name}</h1>
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium text-accent">Tag</p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight text-ink">#{tag.name}</h1>
+        </div>
+        <ShareBar title={`#${tag.name}`} />
       </header>
 
       {tag.pages.length === 0 ? (

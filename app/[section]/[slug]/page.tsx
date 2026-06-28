@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { renderContent } from "@/lib/render-content";
+import { ShareBar } from "@/components/ShareBar";
 
 type Props = { params: Promise<{ section: string; slug: string }> };
 
@@ -68,6 +69,10 @@ export default async function PublicPage({ params }: Props) {
           })}
         </time>
       )}
+
+      <div className="mt-5">
+        <ShareBar title={page.title} />
+      </div>
 
       {page.coverImageUrl && (
         // eslint-disable-next-line @next/next/no-img-element
