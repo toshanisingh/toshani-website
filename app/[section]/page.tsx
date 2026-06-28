@@ -4,8 +4,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { isAboutSlug, activeSocials } from "@/lib/site";
+import { getReactionState } from "@/lib/reactions";
 import { PageCard } from "@/components/PageCard";
 import { ShareBar } from "@/components/ShareBar";
+import { ReactionBar } from "@/components/ReactionBar";
 import { SocialLinks } from "@/components/SocialLinks";
 
 type Props = {
@@ -53,6 +55,8 @@ export default async function SectionPage({ params, searchParams }: Props) {
     }),
   ]);
 
+  const reactions = await getReactionState("SECTION", s.id);
+
   const sortHref = (next: string) => {
     const sp = new URLSearchParams();
     if (tag) sp.set("tag", tag);
@@ -79,6 +83,8 @@ export default async function SectionPage({ params, searchParams }: Props) {
           <ShareBar title={s.name} />
         </div>
       </header>
+
+      <ReactionBar targetType="SECTION" targetId={s.id} initial={reactions} prompt="Like this section?" />
 
       {isAboutSlug(s.slug) && activeSocials.length > 0 && (
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-sky-edge/60 bg-sky-softer px-5 py-4">

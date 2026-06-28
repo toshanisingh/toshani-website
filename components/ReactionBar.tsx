@@ -1,15 +1,30 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { react, type ReactionState, type ReactionType } from "@/app/reactions/actions";
+import {
+  react,
+  type ReactionState,
+  type ReactionTarget,
+  type ReactionType,
+} from "@/app/reactions/actions";
 
-export function ReactionBar({ pageId, initial }: { pageId: string; initial: ReactionState }) {
+export function ReactionBar({
+  targetType,
+  targetId,
+  initial,
+  prompt = "Enjoyed this?",
+}: {
+  targetType: ReactionTarget;
+  targetId: string;
+  initial: ReactionState;
+  prompt?: string;
+}) {
   const [state, setState] = useState<ReactionState>(initial);
   const [pending, start] = useTransition();
 
   const click = (type: ReactionType) =>
     start(async () => {
-      setState(await react(pageId, type));
+      setState(await react(targetType, targetId, type));
     });
 
   const base =
@@ -17,7 +32,7 @@ export function ReactionBar({ pageId, initial }: { pageId: string; initial: Reac
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <span className="text-sm text-muted">Enjoyed this?</span>
+      <span className="text-sm text-muted">{prompt}</span>
       <button
         type="button"
         disabled={pending}

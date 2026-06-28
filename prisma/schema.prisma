@@ -48,7 +48,6 @@ model Page {
   draft         Boolean   @default(true) // write privately, publish when ready
   publishedAt   DateTime?
   tags          Tag[]      @relation("PageTags")
-  reactions     Reaction[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -70,17 +69,26 @@ enum ReactionType {
   LOVE
 }
 
-/// A reader's reaction to a page. One per anonymous visitor per page (choosing
-/// a different type switches it; choosing the same removes it), de-duplicated
-/// by the visitor cookie id.
-model Reaction {
-  id        String       @id @default(cuid())
-  page      Page         @relation(fields: [pageId], references: [id], onDelete: Cascade)
-  pageId    String
-  visitorId String
-  type      ReactionType
-  createdAt DateTime     @default(now())
+enum ReactionTarget {
+  PAGE
+  SECTION
+  TAG
+}
 
-  @@unique([pageId, visitorId])
-  @@index([pageId, type])
+/// A reader's reaction to a page, section, or tag. Polymorphic target
+/// (targetType + targetId) so it works on posts and listing pages alike. One
+/// per anonymous visitor per target (a different type switches it; the same
+/// type removes it), de-duplicated by the visitor cookie id. No FK to the
+/// target — orphaned rows after a target is deleted are cleaned up in the
+/// delete actions (and are harmless if missed, since they're never queried).
+model Reaction {
+  id         String         @id @default(cuid())
+  targetType ReactionTarget
+  targetId   String
+  visitorId  String
+  type       ReactionType
+  createdAt  DateTime       @default(now())
+
+  @@unique([targetType, targetId, visitorId])
+  @@index([targetType, targetId, type])
 }

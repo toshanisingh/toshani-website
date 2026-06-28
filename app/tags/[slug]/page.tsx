@@ -2,8 +2,10 @@ import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getReactionState } from "@/lib/reactions";
 import { PageCard } from "@/components/PageCard";
 import { ShareBar } from "@/components/ShareBar";
+import { ReactionBar } from "@/components/ReactionBar";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -36,6 +38,8 @@ export default async function TagPage({ params }: Props) {
   const tag = await getTag(slug);
   if (!tag) notFound();
 
+  const reactions = await getReactionState("TAG", tag.id);
+
   return (
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-3">
@@ -45,6 +49,8 @@ export default async function TagPage({ params }: Props) {
         </div>
         <ShareBar title={`#${tag.name}`} />
       </header>
+
+      <ReactionBar targetType="TAG" targetId={tag.id} initial={reactions} prompt="Like this tag?" />
 
       {tag.pages.length === 0 ? (
         <p className="text-muted">No published posts with this tag.</p>

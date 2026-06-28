@@ -50,7 +50,17 @@ export async function deleteSection(formData: FormData): Promise<void> {
   await requireAdmin();
   const id = formData.get("id") as string | null;
   if (!id) return;
-  // Pages in the section cascade-delete (see schema relation).
+  // Pages in the section cascade-delete (see schema relation). Reactions are
+  // polymorphic (no FK), so remove reactions for the section and its pages.
+  const pageIds = (await prisma.page.findMany({ where: { sectionId: id }, select: { id: true } })).map((p) => p.id);
+  await prisma.reaction.deleteMany({
+    where: {
+      OR: [
+        { targetType: "SECTION", targetId: id },
+        { targetType: "PAGE", targetId: { in: pageIds } },
+      ],
+    },
+  });
   await prisma.section.delete({ where: { id } });
   refresh();
 }

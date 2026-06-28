@@ -145,5 +145,7 @@ export async function deletePage(formData: FormData): Promise<void> {
     where: { id },
     include: { section: true },
   });
+  // Reactions are polymorphic (no FK), so clean them up explicitly.
+  await prisma.reaction.deleteMany({ where: { targetType: "PAGE", targetId: id } });
   revalidate(page.section.slug, page.slug);
 }

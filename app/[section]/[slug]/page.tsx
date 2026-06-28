@@ -52,7 +52,7 @@ export default async function PublicPage({ params }: Props) {
   if (!page) notFound();
 
   const html = renderContent(page.body);
-  const reactions = await getReactionState(page.id);
+  const reactions = await getReactionState("PAGE", page.id);
 
   return (
     <article className="mx-auto max-w-3xl">
@@ -106,7 +106,7 @@ export default async function PublicPage({ params }: Props) {
       )}
 
       <div className="mt-10 border-t border-sky-edge/60 pt-6">
-        <ReactionBar pageId={page.id} initial={reactions} />
+        <ReactionBar targetType="PAGE" targetId={page.id} initial={reactions} />
       </div>
     </article>
   );
