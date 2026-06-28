@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Toshani — light-blue, educational theme tokens.
+   Exposed to Tailwind as utility colors (bg-primary, text-ink, etc.) and as
+   CSS variables for ad-hoc use. Fonts are wired via next/font in layout.tsx.
+--------------------------------------------------------------------------- */
+@theme {
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-accent: #0ea5e9;
+  --color-sky-soft: #e0f2fe;
+  --color-sky-softer: #f0f9ff;
+  --color-sky-edge: #bae6fd;
+  --color-ink: #0f172a;
+  --color-muted: #475569;
+  --color-page: #f8fafc;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-lora), Georgia, "Times New Roman", serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Comfortable reading measure + typographic defaults for article bodies.
+   Used by rendered page content in later phases. */
+.prose-article {
+  max-width: 65ch;
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: var(--color-ink);
+}
+.prose-article h1,
+.prose-article h2,
+.prose-article h3 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: 1.75em;
+  margin-bottom: 0.5em;
+}
+.prose-article a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-article p {
+  margin-bottom: 1.15em;
+}
