@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHmac, timingSafeEqual, createHash } from "crypto";
 
 // Pure, DB-free token codec for password setup / reset links.
 // Token format: `base64url(JSON payload).base64url(HMAC-SHA256(payload))`.
@@ -18,6 +18,14 @@ function secret(): string {
 
 function sign(body: string): string {
   return createHmac("sha256", secret()).update(body).digest("base64url");
+}
+
+// A short fingerprint of a password-state basis. Used as the token version:
+// when the basis changes (no-account "setup" -> a hash, or one hash -> another
+// after a reset), the version changes, so previously-minted tokens stop
+// matching. This is what makes setup/reset tokens single-use.
+export function versionFromBasis(basis: string): string {
+  return createHash("sha256").update(basis).digest("base64url").slice(0, 16);
 }
 
 export function encodeToken(payload: Payload): string {

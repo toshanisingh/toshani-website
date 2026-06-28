@@ -1,7 +1,6 @@
-import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { ADMIN_EMAIL } from "@/lib/admin";
-import { encodeToken, decodeToken } from "@/lib/token-codec";
+import { encodeToken, decodeToken, versionFromBasis } from "@/lib/token-codec";
 
 // Stateless, single-use password setup / reset tokens. No DB table required.
 //
@@ -19,8 +18,7 @@ const TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
 // A short fingerprint of the current password state, used as the token version.
 async function currentVersion(): Promise<string> {
   const user = await prisma.user.findUnique({ where: { email: ADMIN_EMAIL } });
-  const basis = user?.passwordHash ?? "setup";
-  return createHash("sha256").update(basis).digest("base64url").slice(0, 16);
+  return versionFromBasis(user?.passwordHash ?? "setup");
 }
 
 export async function createResetToken(): Promise<string> {
