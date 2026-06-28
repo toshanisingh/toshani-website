@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { renderContent } from "@/lib/render-content";
 import { ShareBar } from "@/components/ShareBar";
+import { CommentsSection } from "@/components/comments/CommentsSection";
 
 type Props = { params: Promise<{ section: string; slug: string }> };
 
@@ -101,6 +102,8 @@ export default async function PublicPage({ params }: Props) {
           ))}
         </div>
       )}
+
+      <CommentsSection pageId={page.id} />
     </article>
   );
 }

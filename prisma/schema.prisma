@@ -48,6 +48,7 @@ model Page {
   draft         Boolean   @default(true) // write privately, publish when ready
   publishedAt   DateTime?
   tags          Tag[]     @relation("PageTags")
+  comments      Comment[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -62,4 +63,46 @@ model Tag {
   name  String @unique
   slug  String @unique
   pages Page[] @relation("PageTags")
+}
+
+enum CommentStatus {
+  PENDING
+  APPROVED
+  SPAM
+}
+
+/// A reader comment on a page. Stored as PLAIN TEXT (escaped on render — no
+/// HTML), held for admin approval unless authored by the admin. Threaded via
+/// self-relation. ipHash is for DB-based rate limiting (never shown).
+model Comment {
+  id          String        @id @default(cuid())
+  page        Page          @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  pageId      String
+  parent      Comment?      @relation("Thread", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId    String?
+  replies     Comment[]     @relation("Thread")
+  authorName  String
+  authorEmail String? // hidden; for admin notification only
+  body        String
+  isAdmin     Boolean       @default(false)
+  status      CommentStatus @default(PENDING)
+  likeCount   Int           @default(0)
+  ipHash      String? // rate-limiting only; not exposed
+  likes       CommentLike[]
+  createdAt   DateTime      @default(now())
+
+  @@index([pageId, status, createdAt])
+  @@index([status])
+  @@index([ipHash, createdAt])
+}
+
+/// One like per anonymous visitor (cookie id) per comment.
+model CommentLike {
+  id        String   @id @default(cuid())
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId String
+  visitorId String
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, visitorId])
 }
