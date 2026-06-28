@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -5,9 +6,22 @@ import { prisma } from "@/lib/prisma";
 
 type Props = { params: Promise<{ section: string }> };
 
+// Deduped across generateMetadata + the page render within one request.
+const getSection = cache((slug: string) =>
+  prisma.section.findUnique({
+    where: { slug },
+    include: {
+      pages: {
+        where: { draft: false, publishedAt: { not: null } },
+        orderBy: { publishedAt: "desc" },
+      },
+    },
+  }),
+);
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { section } = await params;
-  const s = await prisma.section.findUnique({ where: { slug: section } });
+  const s = await getSection(section);
   if (!s) return {};
   return {
     title: s.name,
@@ -18,15 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SectionPage({ params }: Props) {
   const { section } = await params;
-  const s = await prisma.section.findUnique({
-    where: { slug: section },
-    include: {
-      pages: {
-        where: { draft: false, publishedAt: { not: null } },
-        orderBy: { publishedAt: "desc" },
-      },
-    },
-  });
+  const s = await getSection(section);
   if (!s) notFound();
 
   return (
