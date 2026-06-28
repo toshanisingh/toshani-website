@@ -22,6 +22,15 @@ export async function Header() {
               {s.name}
             </Link>
           ))}
+          <form action="/search" method="get" className="ml-1">
+            <input
+              type="search"
+              name="q"
+              aria-label="Search"
+              placeholder="Search…"
+              className="w-28 rounded-md border border-sky-edge bg-white px-2.5 py-1.5 text-sm text-ink outline-none transition-all focus:w-44 focus:border-primary focus:ring-2 focus:ring-primary/30"
+            />
+          </form>
         </nav>
       </div>
     </header>

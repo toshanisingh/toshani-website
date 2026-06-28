@@ -1,5 +1,6 @@
 import { cache } from "react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { renderContent } from "@/lib/render-content";
@@ -15,7 +16,7 @@ const getPage = cache((sectionSlug: string, slug: string) =>
       publishedAt: { not: null },
       section: { slug: sectionSlug },
     },
-    include: { section: true },
+    include: { section: true, tags: true },
   }),
 );
 
@@ -81,6 +82,20 @@ export default async function PublicPage({ params }: Props) {
         className="prose-article mt-8"
         dangerouslySetInnerHTML={{ __html: html }}
       />
+
+      {page.tags.length > 0 && (
+        <div className="mt-10 flex flex-wrap gap-2 border-t border-sky-edge/60 pt-6">
+          {page.tags.map((t) => (
+            <Link
+              key={t.slug}
+              href={`/tags/${t.slug}`}
+              className="rounded-full bg-sky-soft px-3 py-1 text-sm font-medium text-accent hover:bg-sky-edge"
+            >
+              #{t.name}
+            </Link>
+          ))}
+        </div>
+      )}
     </article>
   );
 }

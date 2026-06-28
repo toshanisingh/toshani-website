@@ -34,6 +34,24 @@ function parseBody(raw: FormDataEntryValue | null): object {
   }
 }
 
+// Parse the comma-separated tags field, upsert each tag (keyed by slug), and
+// return their ids for connecting to the page.
+async function syncTags(raw: FormDataEntryValue | null): Promise<{ id: string }[]> {
+  if (typeof raw !== "string") return [];
+  const names = [...new Set(raw.split(",").map((t) => t.trim()).filter(Boolean))];
+  const ids: { id: string }[] = [];
+  for (const name of names) {
+    const slug = slugify(name);
+    const tag = await prisma.tag.upsert({
+      where: { slug },
+      update: {},
+      create: { name, slug },
+    });
+    ids.push({ id: tag.id });
+  }
+  return ids;
+}
+
 function revalidate(sectionSlug: string, pageSlug?: string) {
   revalidatePath("/admin/pages");
   revalidatePath("/", "layout");
@@ -57,6 +75,7 @@ export async function createPage(_prev: FormState, formData: FormData): Promise<
   const desiredSlug = ((formData.get("slug") as string | null)?.trim() || title);
   const slug = await uniquePageSlug(sectionId, desiredSlug);
   const published = formData.get("published") === "on";
+  const tagIds = await syncTags(formData.get("tags"));
 
   const page = await prisma.page.create({
     data: {
@@ -68,6 +87,7 @@ export async function createPage(_prev: FormState, formData: FormData): Promise<
       coverImageUrl: (formData.get("coverImageUrl") as string | null)?.trim() || null,
       draft: !published,
       publishedAt: published ? new Date() : null,
+      tags: { connect: tagIds },
     },
   });
 
@@ -95,6 +115,7 @@ export async function updatePage(_prev: FormState, formData: FormData): Promise<
   const desiredSlug = ((formData.get("slug") as string | null)?.trim() || title);
   const slug = await uniquePageSlug(sectionId, desiredSlug, id);
   const published = formData.get("published") === "on";
+  const tagIds = await syncTags(formData.get("tags"));
 
   const page = await prisma.page.update({
     where: { id },
@@ -108,6 +129,7 @@ export async function updatePage(_prev: FormState, formData: FormData): Promise<
       draft: !published,
       // Set the publish date on first publish; preserve it afterwards.
       publishedAt: published ? (existing.publishedAt ?? new Date()) : existing.publishedAt,
+      tags: { set: tagIds }, // replace the page's tags with the submitted set
     },
   });
 

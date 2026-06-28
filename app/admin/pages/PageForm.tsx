@@ -15,6 +15,7 @@ type Initial = {
   coverImageUrl?: string | null;
   body?: JSONContent | null;
   published?: boolean;
+  tags?: string[];
 };
 
 const label = "block text-sm font-medium text-ink";
@@ -68,11 +69,18 @@ export function PageForm({
           <input id="excerpt" name="excerpt" defaultValue={initial?.excerpt ?? ""} className={input} />
         </div>
 
-        <div className="sm:col-span-2">
+        <div>
           <label htmlFor="coverImageUrl" className={label}>
             Cover image URL <span className="text-muted">(optional)</span>
           </label>
           <input id="coverImageUrl" name="coverImageUrl" defaultValue={initial?.coverImageUrl ?? ""} placeholder="https://…" className={input} />
+        </div>
+
+        <div>
+          <label htmlFor="tags" className={label}>
+            Tags <span className="text-muted">(comma-separated)</span>
+          </label>
+          <input id="tags" name="tags" defaultValue={initial?.tags?.join(", ") ?? ""} placeholder="travel, books, 2026" className={input} />
         </div>
       </div>
 

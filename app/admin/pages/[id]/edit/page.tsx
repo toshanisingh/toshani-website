@@ -14,7 +14,7 @@ export default async function EditPage({
   await requireAdmin();
   const { id } = await params;
   const [page, sections] = await Promise.all([
-    prisma.page.findUnique({ where: { id } }),
+    prisma.page.findUnique({ where: { id }, include: { tags: true } }),
     getSections(),
   ]);
   if (!page) notFound();
@@ -34,6 +34,7 @@ export default async function EditPage({
           coverImageUrl: page.coverImageUrl,
           body: page.body as JSONContent,
           published: !page.draft,
+          tags: page.tags.map((t) => t.name),
         }}
       />
     </div>
