@@ -10,14 +10,29 @@ function refresh() {
   revalidatePath("/", "layout"); // refresh the nav everywhere
 }
 
-async function uniqueSlug(name: string): Promise<string> {
-  const base = slugify(name);
+async function uniqueSlug(desired: string, exceptId?: string): Promise<string> {
+  const base = slugify(desired);
   let slug = base;
   let n = 2;
-  while (RESERVED_SLUGS.has(slug) || (await prisma.section.findUnique({ where: { slug } }))) {
+  for (;;) {
+    const clash =
+      RESERVED_SLUGS.has(slug) ||
+      (await prisma.section.findFirst({
+        where: { slug, ...(exceptId ? { NOT: { id: exceptId } } : {}) },
+        select: { id: true },
+      }));
+    if (!clash) return slug;
     slug = `${base}-${n++}`;
   }
-  return slug;
+}
+
+function parseBody(raw: FormDataEntryValue | null): object {
+  if (typeof raw !== "string" || !raw) return {};
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return {};
+  }
 }
 
 export async function createSection(
@@ -37,13 +52,26 @@ export async function createSection(
   return undefined;
 }
 
-export async function renameSection(formData: FormData): Promise<void> {
+export async function updateSection(
+  _prev: string | undefined,
+  formData: FormData,
+): Promise<string | undefined> {
   await requireAdmin();
   const id = formData.get("id") as string | null;
   const name = (formData.get("name") as string | null)?.trim();
-  if (!id || !name) return;
-  await prisma.section.update({ where: { id }, data: { name } });
+  if (!id) return "Missing section id.";
+  if (!name) return "Please enter a section name.";
+
+  const desiredSlug = ((formData.get("slug") as string | null)?.trim() || name);
+  const slug = await uniqueSlug(desiredSlug, id);
+
+  await prisma.section.update({
+    where: { id },
+    data: { name, slug, body: parseBody(formData.get("body")) },
+  });
   refresh();
+  revalidatePath(`/${slug}`);
+  return undefined;
 }
 
 export async function deleteSection(formData: FormData): Promise<void> {

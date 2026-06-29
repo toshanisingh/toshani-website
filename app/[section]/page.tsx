@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { isAboutSlug, activeSocials } from "@/lib/site";
+import { renderContent } from "@/lib/render-content";
 import { getReactionState } from "@/lib/reactions";
 import { PageCard } from "@/components/PageCard";
 import { ShareBar } from "@/components/ShareBar";
@@ -56,6 +57,7 @@ export default async function SectionPage({ params, searchParams }: Props) {
   ]);
 
   const reactions = await getReactionState("SECTION", s.id);
+  const bodyHtml = renderContent(s.body);
 
   const sortHref = (next: string) => {
     const sp = new URLSearchParams();
@@ -86,6 +88,10 @@ export default async function SectionPage({ params, searchParams }: Props) {
 
       <ReactionBar targetType="SECTION" targetId={s.id} initial={reactions} prompt="Like this section?" />
 
+      {bodyHtml && (
+        <div className="prose-article" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+      )}
+
       {isAboutSlug(s.slug) && activeSocials.length > 0 && (
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-sky-edge/60 bg-sky-softer px-5 py-4">
           <span className="text-sm font-medium text-ink">Find me online:</span>
@@ -113,16 +119,17 @@ export default async function SectionPage({ params, searchParams }: Props) {
         </div>
       )}
 
-      {pages.length === 0 ? (
-        <p className="text-muted">
-          {tag ? "No posts with this tag yet." : "Nothing published here yet — check back soon."}
-        </p>
-      ) : (
+      {pages.length > 0 ? (
         <ul className="space-y-5">
           {pages.map((p) => (
             <PageCard key={p.id} page={p} />
           ))}
         </ul>
+      ) : tag ? (
+        <p className="text-muted">No posts with this tag yet.</p>
+      ) : (
+        // Only nudge when the section is genuinely empty (no body content either).
+        !bodyHtml && <p className="text-muted">Nothing published here yet — check back soon.</p>
       )}
     </div>
   );

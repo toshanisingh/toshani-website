@@ -28,6 +28,7 @@ model Section {
   name      String
   slug      String   @unique
   position  Int      @default(0) // controls nav ordering
+  body      Json     @default("{}") // optional Tiptap content shown on the section page
   pages     Page[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

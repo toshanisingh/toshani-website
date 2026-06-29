@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/auth-guard";
 import { getSections } from "@/lib/sections";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { AddSectionForm } from "./AddSectionForm";
-import { renameSection, deleteSection, moveSection } from "./actions";
+import { deleteSection, moveSection } from "./actions";
 
 export default async function SectionsAdmin() {
   await requireAdmin();
@@ -32,27 +32,18 @@ export default async function SectionsAdmin() {
               key={s.id}
               className="flex flex-wrap items-center gap-3 rounded-xl border border-sky-edge/60 bg-white p-4"
             >
-              {/* Rename */}
-              <form action={renameSection} className="flex flex-1 items-center gap-2">
-                <input type="hidden" name="id" value={s.id} />
-                <input
-                  name="name"
-                  defaultValue={s.name}
-                  className="min-w-0 flex-1 rounded-md border border-sky-edge bg-white px-2.5 py-1.5 text-sm text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
-                />
-                <button
-                  type="submit"
-                  className="rounded-md border border-sky-edge px-2.5 py-1.5 text-sm font-medium text-muted hover:bg-sky-soft hover:text-primary"
-                >
-                  Save
-                </button>
-              </form>
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <span className="font-semibold text-ink">{s.name}</span>
+                <Link href={`/${s.slug}`} className="font-mono text-xs text-accent hover:underline">
+                  /{s.slug}
+                </Link>
+              </div>
 
               <Link
-                href={`/${s.slug}`}
-                className="font-mono text-xs text-accent hover:underline"
+                href={`/admin/sections/${s.id}/edit`}
+                className="rounded-md border border-sky-edge px-2.5 py-1.5 text-sm font-medium text-muted hover:bg-sky-soft hover:text-primary"
               >
-                /{s.slug}
+                Edit
               </Link>
 
               {/* Reorder */}
