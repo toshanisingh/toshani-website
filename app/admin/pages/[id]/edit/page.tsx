@@ -32,6 +32,7 @@ export default async function EditPage({
           sectionId: page.sectionId,
           excerpt: page.excerpt,
           coverImageUrl: page.coverImageUrl,
+          coverSize: page.coverSize,
           body: page.body as JSONContent,
           published: !page.draft,
           tags: page.tags.map((t) => t.name),

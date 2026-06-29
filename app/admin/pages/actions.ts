@@ -25,6 +25,12 @@ async function uniquePageSlug(
   }
 }
 
+const COVER_SIZES = new Set(["small", "medium", "large", "full"]);
+function coverSizeOf(formData: FormData): string {
+  const v = formData.get("coverSize") as string | null;
+  return v && COVER_SIZES.has(v) ? v : "full";
+}
+
 function parseBody(raw: FormDataEntryValue | null): object {
   if (typeof raw !== "string" || !raw) return {};
   try {
@@ -85,6 +91,7 @@ export async function createPage(_prev: FormState, formData: FormData): Promise<
       body: parseBody(formData.get("body")),
       excerpt: (formData.get("excerpt") as string | null)?.trim() || null,
       coverImageUrl: (formData.get("coverImageUrl") as string | null)?.trim() || null,
+      coverSize: coverSizeOf(formData),
       draft: !published,
       publishedAt: published ? new Date() : null,
       tags: { connect: tagIds },
@@ -126,6 +133,7 @@ export async function updatePage(_prev: FormState, formData: FormData): Promise<
       body: parseBody(formData.get("body")),
       excerpt: (formData.get("excerpt") as string | null)?.trim() || null,
       coverImageUrl: (formData.get("coverImageUrl") as string | null)?.trim() || null,
+      coverSize: coverSizeOf(formData),
       draft: !published,
       // Set the publish date on first publish; preserve it afterwards.
       publishedAt: published ? (existing.publishedAt ?? new Date()) : existing.publishedAt,

@@ -71,3 +71,19 @@ body {
 .prose-article p {
   margin-bottom: 1.15em;
 }
+
+/* Image display-size presets (set via the editor's data-size attribute).
+   Centered; full-width on small screens for readability. */
+.prose-article img {
+  display: block;
+  margin: 1.25em auto;
+  height: auto;
+}
+.prose-article img[data-size="small"] { width: 25%; }
+.prose-article img[data-size="medium"] { width: 50%; }
+.prose-article img[data-size="large"] { width: 75%; }
+.prose-article img[data-size="full"],
+.prose-article img:not([data-size]) { width: 100%; }
+@media (max-width: 640px) {
+  .prose-article img { width: 100%; }
+}

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useEditor, EditorContent, type Editor as TiptapEditor } from "@tiptap/react";
 import type { JSONContent } from "@tiptap/core";
 import { editorExtensions } from "@/lib/editor-extensions";
+import { downscaleImage } from "./resizeImage";
 
 function ToolbarButton({
   onClick,
@@ -80,8 +81,9 @@ export function Editor({
     setUploadError(null);
     setUploading(true);
     try {
+      const toUpload = await downscaleImage(file); // shrink in-browser before upload
       const fd = new FormData();
-      fd.append("file", file);
+      fd.append("file", toUpload);
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) {
@@ -93,6 +95,13 @@ export function Editor({
       setUploadError("Upload failed. Please try again.");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const insertImageUrl = () => {
+    const url = window.prompt("Image URL (https://…)");
+    if (url && url.trim()) {
+      e.chain().focus().setImage({ src: url.trim() }).run();
     }
   };
 
@@ -115,6 +124,16 @@ export function Editor({
   const onFont = (v: string) =>
     v ? e.chain().focus().setFontFamily(v).run() : e.chain().focus().unsetFontFamily().run();
   const currentColor = (e.getAttributes("textStyle").color as string) || "#0f172a";
+
+  const imageActive = e.isActive("image");
+  const imageSize = (e.getAttributes("image").size as string) ?? "full";
+  const setImageSize = (size: string) => e.chain().focus().updateAttributes("image", { size }).run();
+  const IMAGE_SIZES: { label: string; value: string }[] = [
+    { label: "S", value: "small" },
+    { label: "M", value: "medium" },
+    { label: "L", value: "large" },
+    { label: "Full", value: "full" },
+  ];
 
   const divider = <span className="mx-1 h-5 w-px bg-sky-edge" />;
 
@@ -179,10 +198,30 @@ export function Editor({
         <ToolbarButton title="Link" onClick={setLink} active={e.isActive("link")}>
           🔗
         </ToolbarButton>
-        <ToolbarButton title="Insert image" onClick={() => fileInput.current?.click()} disabled={uploading}>
-          {uploading ? "Uploading…" : "🖼 Image"}
+        <ToolbarButton title="Upload image" onClick={() => fileInput.current?.click()} disabled={uploading}>
+          {uploading ? "Uploading…" : "🖼 Upload"}
+        </ToolbarButton>
+        <ToolbarButton title="Insert image by URL" onClick={insertImageUrl}>
+          🔗 Image URL
         </ToolbarButton>
         <input ref={fileInput} type="file" accept="image/*" hidden onChange={onFile} />
+
+        {imageActive && (
+          <>
+            {divider}
+            <span className="px-1 text-xs text-muted">Size:</span>
+            {IMAGE_SIZES.map((s) => (
+              <ToolbarButton
+                key={s.value}
+                title={`Image size: ${s.value}`}
+                onClick={() => setImageSize(s.value)}
+                active={imageSize === s.value}
+              >
+                {s.label}
+              </ToolbarButton>
+            ))}
+          </>
+        )}
       </div>
 
       {uploadError && (

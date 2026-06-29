@@ -13,6 +13,7 @@ type Initial = {
   sectionId?: string;
   excerpt?: string | null;
   coverImageUrl?: string | null;
+  coverSize?: string | null;
   body?: JSONContent | null;
   published?: boolean;
   tags?: string[];
@@ -74,6 +75,16 @@ export function PageForm({
             Cover image URL <span className="text-muted">(optional)</span>
           </label>
           <input id="coverImageUrl" name="coverImageUrl" defaultValue={initial?.coverImageUrl ?? ""} placeholder="https://…" className={input} />
+        </div>
+
+        <div>
+          <label htmlFor="coverSize" className={label}>Cover size</label>
+          <select id="coverSize" name="coverSize" defaultValue={initial?.coverSize ?? "full"} className={input}>
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+            <option value="full">Full width</option>
+          </select>
         </div>
 
         <div>

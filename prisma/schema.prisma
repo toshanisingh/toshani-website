@@ -46,6 +46,7 @@ model Page {
   body          Json      @default("{}") // Tiptap document JSON
   excerpt       String?
   coverImageUrl String?
+  coverSize     String    @default("full") // small | medium | large | full
   draft         Boolean   @default(true) // write privately, publish when ready
   publishedAt   DateTime?
   tags          Tag[]      @relation("PageTags")

@@ -10,6 +10,20 @@ import { ReactionBar } from "@/components/ReactionBar";
 
 type Props = { params: Promise<{ section: string; slug: string }> };
 
+// Cover width by chosen size; full-width on mobile, centered when not full.
+function coverWidth(size: string): string {
+  switch (size) {
+    case "small":
+      return "w-full sm:w-1/4 mx-auto";
+    case "medium":
+      return "w-full sm:w-1/2 mx-auto";
+    case "large":
+      return "w-full sm:w-3/4 mx-auto";
+    default:
+      return "w-full";
+  }
+}
+
 // Only published, non-draft pages are public. Deduped across metadata + render.
 const getPage = cache((sectionSlug: string, slug: string) =>
   prisma.page.findFirst({
@@ -82,7 +96,7 @@ export default async function PublicPage({ params }: Props) {
         <img
           src={page.coverImageUrl}
           alt=""
-          className="mt-6 w-full rounded-xl border border-sky-edge/60"
+          className={`mt-6 h-auto rounded-xl border border-sky-edge/60 ${coverWidth(page.coverSize)}`}
         />
       )}
 

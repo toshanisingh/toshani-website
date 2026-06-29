@@ -36,7 +36,7 @@ export function renderContent(body: unknown): string {
     ],
     allowedAttributes: {
       a: ["href", "target", "rel"],
-      img: ["src", "alt", "title", "class"],
+      img: ["src", "alt", "title", "class", "data-size"],
       code: ["class"],
       pre: ["class"],
       span: ["class", "style"],
