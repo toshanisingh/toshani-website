@@ -42,12 +42,26 @@ body {
 }
 .prose-article h1,
 .prose-article h2,
-.prose-article h3 {
+.prose-article h3,
+.prose-article h4,
+.prose-article h5,
+.prose-article h6 {
   font-family: var(--font-sans);
   font-weight: 700;
   line-height: 1.25;
   margin-top: 1.75em;
   margin-bottom: 0.5em;
+}
+.prose-article h1 { font-size: 2rem; }
+.prose-article h2 { font-size: 1.6rem; }
+.prose-article h3 { font-size: 1.3rem; }
+.prose-article h4 { font-size: 1.15rem; }
+.prose-article h5 { font-size: 1rem; }
+.prose-article h6 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-muted);
 }
 .prose-article a {
   color: var(--color-primary);

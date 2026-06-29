@@ -96,23 +96,73 @@ export function Editor({
     }
   };
 
+  const FONTS = [
+    { label: "Font", value: "" },
+    { label: "Sans", value: "Inter, ui-sans-serif, system-ui, sans-serif" },
+    { label: "Serif", value: "Lora, Georgia, serif" },
+    { label: "Mono", value: "ui-monospace, SFMono-Regular, Menlo, monospace" },
+  ];
+  const select = "rounded border border-sky-edge bg-white px-2 py-1 text-sm text-ink outline-none focus:border-primary";
+
+  const headingValue =
+    [1, 2, 3, 4, 5, 6].find((l) => e.isActive("heading", { level: l }))?.toString() ?? "p";
+  const onHeading = (v: string) =>
+    v === "p"
+      ? e.chain().focus().setParagraph().run()
+      : e.chain().focus().setHeading({ level: Number(v) as 1 | 2 | 3 | 4 | 5 | 6 }).run();
+
+  const currentFont = (e.getAttributes("textStyle").fontFamily as string) ?? "";
+  const onFont = (v: string) =>
+    v ? e.chain().focus().setFontFamily(v).run() : e.chain().focus().unsetFontFamily().run();
+  const currentColor = (e.getAttributes("textStyle").color as string) || "#0f172a";
+
+  const divider = <span className="mx-1 h-5 w-px bg-sky-edge" />;
+
   return (
     <div className="rounded-lg border border-sky-edge bg-white">
       <div className="flex flex-wrap items-center gap-0.5 border-b border-sky-edge/60 p-1.5">
+        <select aria-label="Text style" value={headingValue} onChange={(ev) => onHeading(ev.target.value)} className={select}>
+          <option value="p">Paragraph</option>
+          <option value="1">Heading 1</option>
+          <option value="2">Heading 2</option>
+          <option value="3">Heading 3</option>
+          <option value="4">Heading 4</option>
+          <option value="5">Heading 5</option>
+          <option value="6">Heading 6</option>
+        </select>
+        <select aria-label="Font" value={currentFont} onChange={(ev) => onFont(ev.target.value)} className={select}>
+          {FONTS.map((f) => (
+            <option key={f.label} value={f.value}>{f.label}</option>
+          ))}
+        </select>
+        {divider}
         <ToolbarButton title="Bold" onClick={() => e.chain().focus().toggleBold().run()} active={e.isActive("bold")}>
           <strong>B</strong>
         </ToolbarButton>
         <ToolbarButton title="Italic" onClick={() => e.chain().focus().toggleItalic().run()} active={e.isActive("italic")}>
           <em>i</em>
         </ToolbarButton>
-        <span className="mx-1 h-5 w-px bg-sky-edge" />
-        <ToolbarButton title="Heading 2" onClick={() => e.chain().focus().toggleHeading({ level: 2 }).run()} active={e.isActive("heading", { level: 2 })}>
-          H2
+        <ToolbarButton title="Underline" onClick={() => e.chain().focus().toggleUnderline().run()} active={e.isActive("underline")}>
+          <span className="underline">U</span>
         </ToolbarButton>
-        <ToolbarButton title="Heading 3" onClick={() => e.chain().focus().toggleHeading({ level: 3 }).run()} active={e.isActive("heading", { level: 3 })}>
-          H3
+        <ToolbarButton title="Strikethrough" onClick={() => e.chain().focus().toggleStrike().run()} active={e.isActive("strike")}>
+          <span className="line-through">S</span>
         </ToolbarButton>
-        <span className="mx-1 h-5 w-px bg-sky-edge" />
+        {divider}
+        <label className="flex items-center" title="Text color">
+          <input
+            type="color"
+            value={currentColor}
+            onChange={(ev) => e.chain().focus().setColor(ev.target.value).run()}
+            className="h-7 w-7 cursor-pointer rounded border border-sky-edge bg-white p-0.5"
+          />
+        </label>
+        <ToolbarButton title="Clear color" onClick={() => e.chain().focus().unsetColor().run()}>✕</ToolbarButton>
+        {divider}
+        <ToolbarButton title="Align left" onClick={() => e.chain().focus().setTextAlign("left").run()} active={e.isActive({ textAlign: "left" })}>⯇</ToolbarButton>
+        <ToolbarButton title="Align center" onClick={() => e.chain().focus().setTextAlign("center").run()} active={e.isActive({ textAlign: "center" })}>≡</ToolbarButton>
+        <ToolbarButton title="Align right" onClick={() => e.chain().focus().setTextAlign("right").run()} active={e.isActive({ textAlign: "right" })}>⯈</ToolbarButton>
+        {divider}
         <ToolbarButton title="Bullet list" onClick={() => e.chain().focus().toggleBulletList().run()} active={e.isActive("bulletList")}>
           • List
         </ToolbarButton>
@@ -125,7 +175,7 @@ export function Editor({
         <ToolbarButton title="Code block" onClick={() => e.chain().focus().toggleCodeBlock().run()} active={e.isActive("codeBlock")}>
           {"</>"}
         </ToolbarButton>
-        <span className="mx-1 h-5 w-px bg-sky-edge" />
+        {divider}
         <ToolbarButton title="Link" onClick={setLink} active={e.isActive("link")}>
           🔗
         </ToolbarButton>

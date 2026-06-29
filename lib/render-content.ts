@@ -26,11 +26,12 @@ export function renderContent(body: unknown): string {
     return "";
   }
 
+  const headings = ["h1", "h2", "h3", "h4", "h5", "h6"];
   return sanitizeHtml(raw, {
     allowedTags: [
-      "p", "h1", "h2", "h3", "h4",
+      "p", ...headings,
       "blockquote", "ul", "ol", "li",
-      "strong", "em", "s", "code", "pre",
+      "strong", "em", "s", "u", "code", "pre",
       "a", "img", "hr", "br", "span",
     ],
     allowedAttributes: {
@@ -38,7 +39,18 @@ export function renderContent(body: unknown): string {
       img: ["src", "alt", "title", "class"],
       code: ["class"],
       pre: ["class"],
-      span: ["class"],
+      span: ["class", "style"],
+      p: ["style"],
+      ...Object.fromEntries(headings.map((h) => [h, ["style"]])),
+    },
+    // Only these CSS properties survive, with value patterns that exclude
+    // url()/expression()/semicolons — so inline style can't carry an exploit.
+    allowedStyles: {
+      "*": {
+        "font-family": [/^[\w\s"',-]+$/],
+        color: [/^#(0x)?[0-9a-fA-F]{3,8}$/, /^rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)$/, /^[a-zA-Z]+$/],
+        "text-align": [/^(left|right|center|justify)$/],
+      },
     },
     // Block javascript:/data: URIs in links; images only over http(s).
     allowedSchemes: ["http", "https", "mailto"],

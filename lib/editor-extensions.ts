@@ -1,16 +1,19 @@
 import { StarterKit } from "@tiptap/starter-kit";
 import { Image } from "@tiptap/extension-image";
+import { TextStyle } from "@tiptap/extension-text-style";
+import { FontFamily } from "@tiptap/extension-font-family";
+import { Color } from "@tiptap/extension-color";
+import { TextAlign } from "@tiptap/extension-text-align";
 
 // Shared by the client editor (components/editor/Editor.tsx) and the server
 // render path (lib/render-content.ts) so authored and published HTML match.
-// StarterKit v3 already bundles Link, so we configure it here rather than
-// registering a second Link extension (which warns about duplicates).
+// StarterKit v3 already bundles Link + Underline, so we configure Link here and
+// use Underline as-is rather than re-registering them.
 export const editorExtensions = [
   StarterKit.configure({
-    // Restrict headings to h2–h4: h1 is the page title, and the sanitize
-    // allowlist only permits h2–h4, so this keeps editor output and rendered
-    // output in agreement (no silently-stripped h5/h6).
-    heading: { levels: [2, 3, 4] },
+    // Full range of heading levels (h1 is also the page title — content h1 is
+    // allowed but use sparingly). Kept in sync with the sanitize allowlist.
+    heading: { levels: [1, 2, 3, 4, 5, 6] },
     link: {
       openOnClick: false,
       autolink: true,
@@ -20,4 +23,9 @@ export const editorExtensions = [
   Image.configure({
     HTMLAttributes: { class: "rounded-lg my-4 h-auto max-w-full" },
   }),
+  // TextStyle must come before FontFamily/Color (they attach to it).
+  TextStyle,
+  FontFamily,
+  Color,
+  TextAlign.configure({ types: ["heading", "paragraph"] }),
 ];
