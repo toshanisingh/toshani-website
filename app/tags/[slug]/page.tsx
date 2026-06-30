@@ -2,10 +2,25 @@ import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { getReactionState } from "@/lib/reactions";
+import { getReactionCounts } from "@/lib/reactions";
 import { PageCard } from "@/components/PageCard";
 import { ShareBar } from "@/components/ShareBar";
 import { ReactionBar } from "@/components/ReactionBar";
+
+// ISR-cached (no cookie/searchParams in render).
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  try {
+    const tags = await prisma.tag.findMany({
+      where: { pages: { some: { draft: false, publishedAt: { not: null } } } },
+      select: { slug: true },
+    });
+    return tags.map((t) => ({ slug: t.slug }));
+  } catch {
+    return [];
+  }
+}
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -38,7 +53,7 @@ export default async function TagPage({ params }: Props) {
   const tag = await getTag(slug);
   if (!tag) notFound();
 
-  const reactions = await getReactionState("TAG", tag.id);
+  const reactions = await getReactionCounts("TAG", tag.id);
 
   return (
     <div className="space-y-8">

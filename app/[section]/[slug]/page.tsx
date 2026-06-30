@@ -4,9 +4,29 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { renderContent } from "@/lib/render-content";
-import { getReactionState } from "@/lib/reactions";
+import { getReactionCounts } from "@/lib/reactions";
 import { ShareBar } from "@/components/ShareBar";
 import { ReactionBar } from "@/components/ReactionBar";
+
+// Cache published posts (ISR). On-demand revalidation on publish/edit (see the
+// page actions) keeps them current; this TTL is a backstop that also refreshes
+// reaction counts. No cookie/searchParams here, so the page renders statically.
+export const revalidate = 3600;
+
+// Pre-render published posts at build and cache them; posts published later are
+// rendered on first request and cached (dynamicParams defaults to true). Falls
+// back to pure on-demand if the DB is unreachable at build.
+export async function generateStaticParams() {
+  try {
+    const pages = await prisma.page.findMany({
+      where: { draft: false, publishedAt: { not: null } },
+      select: { slug: true, section: { select: { slug: true } } },
+    });
+    return pages.map((p) => ({ section: p.section.slug, slug: p.slug }));
+  } catch {
+    return [];
+  }
+}
 
 type Props = { params: Promise<{ section: string; slug: string }> };
 
@@ -66,7 +86,7 @@ export default async function PublicPage({ params }: Props) {
   if (!page) notFound();
 
   const html = renderContent(page.body);
-  const reactions = await getReactionState("PAGE", page.id);
+  const reactions = await getReactionCounts("PAGE", page.id);
 
   return (
     <article className="mx-auto max-w-3xl">

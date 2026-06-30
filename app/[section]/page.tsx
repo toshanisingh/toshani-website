@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { isAboutSlug, activeSocials } from "@/lib/site";
 import { renderContent } from "@/lib/render-content";
-import { getReactionState } from "@/lib/reactions";
+import { getReactionCounts } from "@/lib/reactions";
 import { PageCard } from "@/components/PageCard";
 import { ShareBar } from "@/components/ShareBar";
 import { ReactionBar } from "@/components/ReactionBar";
@@ -56,7 +56,7 @@ export default async function SectionPage({ params, searchParams }: Props) {
     }),
   ]);
 
-  const reactions = await getReactionState("SECTION", s.id);
+  const reactions = await getReactionCounts("SECTION", s.id);
   const bodyHtml = renderContent(s.body);
 
   const sortHref = (next: string) => {
